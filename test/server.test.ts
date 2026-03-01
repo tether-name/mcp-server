@@ -7,7 +7,7 @@ function setupEnv(
   overrides: Record<string, string | undefined> = {}
 ): () => void {
   const defaults: Record<string, string> = {
-    TETHER_CREDENTIAL_ID: "test-credential-id",
+    TETHER_AGENT_ID: "test-agent-id",
     TETHER_PRIVATE_KEY_PATH: "/tmp/test-key.der",
   };
   const merged = { ...defaults, ...overrides };
@@ -69,7 +69,7 @@ describe("tether-name-mcp-server", () => {
 
       const names = result.tools.map((t) => t.name).sort();
       expect(names).toEqual([
-        "get_credential_info",
+        "get_agent_info",
         "request_challenge",
         "sign_challenge",
         "submit_proof",
@@ -107,23 +107,23 @@ describe("tether-name-mcp-server", () => {
     });
   });
 
-  describe("get_credential_info", () => {
-    it("should return configured credential info", async () => {
+  describe("get_agent_info", () => {
+    it("should return configured agent info", async () => {
       const restore = setupEnv({
-        TETHER_CREDENTIAL_ID: "my-cred-id",
+        TETHER_AGENT_ID: "my-agent-id",
         TETHER_PRIVATE_KEY_PATH: "/path/to/key.der",
       });
 
       try {
         const { client } = await createTestClient();
         const result = await client.callTool({
-          name: "get_credential_info",
+          name: "get_agent_info",
           arguments: {},
         });
 
         const content = result.content as Array<{ type: string; text: string }>;
         const info = JSON.parse(content[0].text);
-        expect(info.credentialId).toBe("my-cred-id");
+        expect(info.agentId).toBe("my-agent-id");
         expect(info.privateKeyPath).toBe("/path/to/key.der");
         expect(info.configured).toBe(true);
       } finally {
@@ -133,7 +133,7 @@ describe("tether-name-mcp-server", () => {
 
     it("should show not-set when env vars are missing", async () => {
       const restore = setupEnv({
-        TETHER_CREDENTIAL_ID: undefined,
+        TETHER_AGENT_ID: undefined,
         TETHER_PRIVATE_KEY_PATH: undefined,
         TETHER_BASE_URL: undefined,
       });
@@ -141,13 +141,13 @@ describe("tether-name-mcp-server", () => {
       try {
         const { client } = await createTestClient();
         const result = await client.callTool({
-          name: "get_credential_info",
+          name: "get_agent_info",
           arguments: {},
         });
 
         const content = result.content as Array<{ type: string; text: string }>;
         const info = JSON.parse(content[0].text);
-        expect(info.credentialId).toBe("(not set)");
+        expect(info.agentId).toBe("(not set)");
         expect(info.privateKeyPath).toBe("(not set)");
         expect(info.configured).toBe(false);
       } finally {
@@ -157,9 +157,9 @@ describe("tether-name-mcp-server", () => {
   });
 
   describe("verify_identity", () => {
-    it("should return error when TETHER_CREDENTIAL_ID is not set", async () => {
+    it("should return error when TETHER_AGENT_ID is not set", async () => {
       const restore = setupEnv({
-        TETHER_CREDENTIAL_ID: undefined,
+        TETHER_AGENT_ID: undefined,
       });
 
       try {
@@ -170,7 +170,7 @@ describe("tether-name-mcp-server", () => {
         });
 
         const content = result.content as Array<{ type: string; text: string }>;
-        expect(content[0].text).toContain("TETHER_CREDENTIAL_ID");
+        expect(content[0].text).toContain("TETHER_AGENT_ID");
         expect(result.isError).toBe(true);
       } finally {
         restore();
@@ -199,9 +199,9 @@ describe("tether-name-mcp-server", () => {
   });
 
   describe("request_challenge", () => {
-    it("should return error when credentials are not configured", async () => {
+    it("should return error when agent settings are not configured", async () => {
       const restore = setupEnv({
-        TETHER_CREDENTIAL_ID: undefined,
+        TETHER_AGENT_ID: undefined,
         TETHER_PRIVATE_KEY_PATH: undefined,
       });
 
@@ -213,7 +213,7 @@ describe("tether-name-mcp-server", () => {
         });
 
         const content = result.content as Array<{ type: string; text: string }>;
-        expect(content[0].text).toContain("TETHER_CREDENTIAL_ID");
+        expect(content[0].text).toContain("TETHER_AGENT_ID");
         expect(result.isError).toBe(true);
       } finally {
         restore();
@@ -222,9 +222,9 @@ describe("tether-name-mcp-server", () => {
   });
 
   describe("sign_challenge", () => {
-    it("should return error when credentials are not configured", async () => {
+    it("should return error when agent settings are not configured", async () => {
       const restore = setupEnv({
-        TETHER_CREDENTIAL_ID: undefined,
+        TETHER_AGENT_ID: undefined,
         TETHER_PRIVATE_KEY_PATH: undefined,
       });
 
@@ -236,7 +236,7 @@ describe("tether-name-mcp-server", () => {
         });
 
         const content = result.content as Array<{ type: string; text: string }>;
-        expect(content[0].text).toContain("TETHER_CREDENTIAL_ID");
+        expect(content[0].text).toContain("TETHER_AGENT_ID");
         expect(result.isError).toBe(true);
       } finally {
         restore();
@@ -245,9 +245,9 @@ describe("tether-name-mcp-server", () => {
   });
 
   describe("submit_proof", () => {
-    it("should return error when credentials are not configured", async () => {
+    it("should return error when agent settings are not configured", async () => {
       const restore = setupEnv({
-        TETHER_CREDENTIAL_ID: undefined,
+        TETHER_AGENT_ID: undefined,
         TETHER_PRIVATE_KEY_PATH: undefined,
       });
 
@@ -259,7 +259,7 @@ describe("tether-name-mcp-server", () => {
         });
 
         const content = result.content as Array<{ type: string; text: string }>;
-        expect(content[0].text).toContain("TETHER_CREDENTIAL_ID");
+        expect(content[0].text).toContain("TETHER_AGENT_ID");
         expect(result.isError).toBe(true);
       } finally {
         restore();
