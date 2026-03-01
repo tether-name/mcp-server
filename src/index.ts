@@ -10,12 +10,12 @@ export function createServer(): McpServer {
   });
 
   function getClient(): TetherClient {
-    const credentialId = process.env.TETHER_CREDENTIAL_ID;
+    const agentId = process.env.TETHER_AGENT_ID;
     const privateKeyPath = process.env.TETHER_PRIVATE_KEY_PATH;
 
-    if (!credentialId) {
+    if (!agentId) {
       throw new Error(
-        "TETHER_CREDENTIAL_ID environment variable is required"
+        "TETHER_AGENT_ID environment variable is required"
       );
     }
     if (!privateKeyPath) {
@@ -25,7 +25,7 @@ export function createServer(): McpServer {
     }
 
     return new TetherClient({
-      credentialId,
+      agentId,
       privateKeyPath,
     });
   }
@@ -148,13 +148,13 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "get_credential_info",
+    "get_agent_info",
     {
       description:
-        "Get information about the currently configured tether.name credential. Returns the credential ID and key path.",
+        "Get information about the currently configured tether.name agent. Returns the agent ID and key path.",
     },
     async () => {
-      const credentialId = process.env.TETHER_CREDENTIAL_ID;
+      const agentId = process.env.TETHER_AGENT_ID;
       const privateKeyPath = process.env.TETHER_PRIVATE_KEY_PATH;
 
       return {
@@ -163,9 +163,9 @@ export function createServer(): McpServer {
             type: "text",
             text: JSON.stringify(
               {
-                credentialId: credentialId || "(not set)",
+                agentId: agentId || "(not set)",
                 privateKeyPath: privateKeyPath || "(not set)",
-                configured: !!(credentialId && privateKeyPath),
+                configured: !!(agentId && privateKeyPath),
               },
               null,
               2

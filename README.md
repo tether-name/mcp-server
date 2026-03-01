@@ -22,7 +22,7 @@ The server reads from environment variables:
 
 | Variable                  | Required | Description                                          |
 |---------------------------|----------|------------------------------------------------------|
-| `TETHER_CREDENTIAL_ID`    | ✅        | Your Tether credential ID                            |
+| `TETHER_AGENT_ID`    | ✅        | Your Tether agent ID                            |
 | `TETHER_PRIVATE_KEY_PATH` | ✅        | Path to your RSA private key (PEM or DER)            |
 
 ## MCP Client Setup
@@ -41,7 +41,7 @@ Add to your `claude_desktop_config.json`:
         "tether-name-mcp-server"
       ],
       "env": {
-        "TETHER_CREDENTIAL_ID": "your-credential-id",
+        "TETHER_AGENT_ID": "your-agent-id",
         "TETHER_PRIVATE_KEY_PATH": "/path/to/private-key.pem"
       }
     }
@@ -63,7 +63,7 @@ Add to `.cursor/mcp.json` in your project:
         "tether-name-mcp-server"
       ],
       "env": {
-        "TETHER_CREDENTIAL_ID": "your-credential-id",
+        "TETHER_AGENT_ID": "your-agent-id",
         "TETHER_PRIVATE_KEY_PATH": "/path/to/private-key.pem"
       }
     }
@@ -86,7 +86,7 @@ Add to your VS Code settings or `.vscode/mcp.json`:
           "tether-name-mcp-server"
         ],
         "env": {
-          "TETHER_CREDENTIAL_ID": "your-credential-id",
+          "TETHER_AGENT_ID": "your-agent-id",
           "TETHER_PRIVATE_KEY_PATH": "/path/to/private-key.pem"
         }
       }
@@ -103,7 +103,7 @@ Add to your VS Code settings or `.vscode/mcp.json`:
 | `request_challenge`   | Request a new challenge string from the Tether API                                         |
 | `sign_challenge`      | Sign a challenge string with the configured RSA private key                                |
 | `submit_proof`        | Submit a signed proof for a challenge                                                      |
-| `get_credential_info` | Show the currently configured credential ID and key path                        |
+| `get_agent_info` | Show the currently configured agent ID and key path                        |
 
 ## How It Works
 
