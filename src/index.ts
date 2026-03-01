@@ -6,7 +6,7 @@ import { z } from "zod";
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "tether-name-mcp-server",
-    version: "1.0.4",
+    version: "2.0.0",
   });
 
   function getClient(): TetherClient {
