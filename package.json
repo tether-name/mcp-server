@@ -1,6 +1,6 @@
 {
   "name": "tether-name-mcp-server",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "MCP server for tether.name - AI agent identity verification",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "tether-name": "^2.0.0",
+    "tether-name": "^2.0.1",
     "zod": "^4.0.0"
   },
   "devDependencies": {
