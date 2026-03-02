@@ -30,6 +30,20 @@ export function createServer(): McpServer {
     });
   }
 
+  function getManagementClient(): TetherClient {
+    const apiKey = process.env.TETHER_API_KEY;
+
+    if (!apiKey) {
+      throw new Error(
+        "TETHER_API_KEY environment variable is required for management operations"
+      );
+    }
+
+    return new TetherClient({
+      apiKey,
+    });
+  }
+
   server.registerTool(
     "verify_identity",
     {
@@ -173,6 +187,122 @@ export function createServer(): McpServer {
           },
         ],
       };
+    }
+  );
+
+  // --- Agent Management Tools ---
+
+  server.registerTool(
+    "create_agent",
+    {
+      description:
+        "Create a new Tether agent. Requires TETHER_API_KEY. Returns the agent ID, name, and registration token (save it — it cannot be retrieved later). Optionally assign a verified domain.",
+      inputSchema: {
+        agentName: z.string().describe("Name for the new agent"),
+        description: z.string().optional().describe("Optional description for the agent"),
+        domainId: z.string().optional().describe("Optional verified domain ID to assign to this agent"),
+      },
+    },
+    async ({ agentName, description, domainId }) => {
+      try {
+        const client = getManagementClient();
+        const agent = await client.createAgent(agentName, description || "", domainId);
+        return {
+          content: [{ type: "text", text: JSON.stringify(agent, null, 2) }],
+        };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text", text: `Failed to create agent: ${message}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.registerTool(
+    "list_agents",
+    {
+      description:
+        "List all Tether agents for the authenticated account. Requires TETHER_API_KEY.",
+    },
+    async () => {
+      try {
+        const client = getManagementClient();
+        const agents = await client.listAgents();
+        return {
+          content: [{ type: "text", text: JSON.stringify(agents, null, 2) }],
+        };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text", text: `Failed to list agents: ${message}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.registerTool(
+    "delete_agent",
+    {
+      description:
+        "Delete a Tether agent by ID. Requires TETHER_API_KEY. This action is irreversible.",
+      inputSchema: {
+        agentId: z.string().describe("The agent ID to delete"),
+      },
+    },
+    async ({ agentId }) => {
+      try {
+        const client = getManagementClient();
+        await client.deleteAgent(agentId);
+        return {
+          content: [
+            { type: "text", text: JSON.stringify({ deleted: true, id: agentId }, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text", text: `Failed to delete agent: ${message}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.registerTool(
+    "list_domains",
+    {
+      description:
+        "List all registered domains for the authenticated account. Requires TETHER_API_KEY. Use domain IDs when creating agents with domain assignment.",
+    },
+    async () => {
+      try {
+        const client = getManagementClient();
+        const domains = await client.listDomains();
+        return {
+          content: [{ type: "text", text: JSON.stringify(domains, null, 2) }],
+        };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text", text: `Failed to list domains: ${message}` },
+          ],
+          isError: true,
+        };
+      }
     }
   );
 
