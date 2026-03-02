@@ -20,10 +20,11 @@ npx tether-name-mcp-server
 
 The server reads from environment variables:
 
-| Variable                  | Required | Description                                          |
-|---------------------------|----------|------------------------------------------------------|
-| `TETHER_AGENT_ID`    | ✅        | Your Tether agent ID                            |
-| `TETHER_PRIVATE_KEY_PATH` | ✅        | Path to your RSA private key (PEM or DER)            |
+| Variable                  | Required              | Description                                          |
+|---------------------------|-----------------------|------------------------------------------------------|
+| `TETHER_AGENT_ID`         | For verification      | Your Tether agent ID                                 |
+| `TETHER_PRIVATE_KEY_PATH` | For verification      | Path to your RSA private key (PEM or DER)            |
+| `TETHER_API_KEY`          | For management tools  | API key for agent and domain management              |
 
 ## MCP Client Setup
 
@@ -42,12 +43,15 @@ Add to your `claude_desktop_config.json`:
       ],
       "env": {
         "TETHER_AGENT_ID": "your-agent-id",
-        "TETHER_PRIVATE_KEY_PATH": "/path/to/private-key.pem"
+        "TETHER_PRIVATE_KEY_PATH": "/path/to/private-key.pem",
+        "TETHER_API_KEY": "sk-tether-name-..."
       }
     }
   }
 }
 ```
+
+> `TETHER_API_KEY` is only needed for management tools (`create_agent`, `list_agents`, `delete_agent`, `list_domains`). Verification tools only need `TETHER_AGENT_ID` and `TETHER_PRIVATE_KEY_PATH`.
 
 ### Cursor
 
@@ -97,13 +101,26 @@ Add to your VS Code settings or `.vscode/mcp.json`:
 
 ## Tools
 
+### Verification
+
 | Tool                  | Description                                                                                |
 |-----------------------|--------------------------------------------------------------------------------------------|
 | `verify_identity`     | Complete verification flow in one call — requests a challenge, signs it, and submits proof |
 | `request_challenge`   | Request a new challenge string from the Tether API                                         |
 | `sign_challenge`      | Sign a challenge string with the configured RSA private key                                |
 | `submit_proof`        | Submit a signed proof for a challenge                                                      |
-| `get_agent_info` | Show the currently configured agent ID and key path                        |
+| `get_agent_info`      | Show the currently configured agent ID and key path                                        |
+
+### Agent Management
+
+These tools require `TETHER_API_KEY` to be set.
+
+| Tool                  | Description                                                                                |
+|-----------------------|--------------------------------------------------------------------------------------------|
+| `create_agent`        | Create a new agent (with optional domain assignment via `domainId`)                        |
+| `list_agents`         | List all agents for the authenticated account                                              |
+| `delete_agent`        | Delete an agent by ID                                                                      |
+| `list_domains`        | List all registered domains                                                                |
 
 ## How It Works
 
