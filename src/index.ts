@@ -44,6 +44,43 @@ export function createServer(): McpServer {
     });
   }
 
+  function getManagementApiConfig(): { apiKey: string; baseUrl: string } {
+    const apiKey = process.env.TETHER_API_KEY;
+    if (!apiKey) {
+      throw new Error(
+        "TETHER_API_KEY environment variable is required for management operations"
+      );
+    }
+
+    const baseUrl = process.env.TETHER_API_URL || "https://api.tether.name";
+    return { apiKey, baseUrl };
+  }
+
+  async function managementFetch(path: string, init: RequestInit = {}): Promise<unknown> {
+    const { apiKey, baseUrl } = getManagementApiConfig();
+
+    const headers = {
+      ...(init.headers || {}),
+      Authorization: `Bearer ${apiKey}`,
+    } as Record<string, string>;
+
+    if (init.body && !headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    const response = await fetch(`${baseUrl}${path}`, {
+      ...init,
+      headers,
+    });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      throw new Error(`HTTP ${response.status} ${response.statusText}${text ? `: ${text}` : ""}`);
+    }
+
+    return response.json();
+  }
+
   server.registerTool(
     "verify_identity",
     {
@@ -300,6 +337,112 @@ export function createServer(): McpServer {
           content: [
             { type: "text", text: `Failed to list domains: ${message}` },
           ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.registerTool(
+    "list_agent_keys",
+    {
+      description:
+        "List key lifecycle entries for an agent. Requires TETHER_API_KEY.",
+      inputSchema: {
+        agentId: z.string().describe("Agent ID"),
+      },
+    },
+    async ({ agentId }) => {
+      try {
+        const keys = await managementFetch(`/agents/${agentId}/keys`, {
+          method: "GET",
+        });
+        return {
+          content: [{ type: "text", text: JSON.stringify(keys, null, 2) }],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return {
+          content: [{ type: "text", text: `Failed to list agent keys: ${message}` }],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.registerTool(
+    "rotate_agent_key",
+    {
+      description:
+        "Rotate an agent key. Requires TETHER_API_KEY plus step-up verification via stepUpCode or challenge+proof.",
+      inputSchema: {
+        agentId: z.string().describe("Agent ID"),
+        publicKey: z.string().describe("New base64 SPKI public key"),
+        gracePeriodHours: z.number().int().min(0).max(168).optional().describe("Grace window in hours (default 24)"),
+        reason: z.string().optional().describe("Rotation reason"),
+        stepUpCode: z.string().optional().describe("Email step-up code"),
+        challenge: z.string().optional().describe("Challenge code for key-proof step-up"),
+        proof: z.string().optional().describe("Signature over challenge for key-proof step-up"),
+      },
+    },
+    async ({ agentId, publicKey, gracePeriodHours, reason, stepUpCode, challenge, proof }) => {
+      try {
+        const result = await managementFetch(`/agents/${agentId}/keys/rotate`, {
+          method: "POST",
+          body: JSON.stringify({
+            publicKey,
+            ...(gracePeriodHours !== undefined ? { gracePeriodHours } : {}),
+            ...(reason ? { reason } : {}),
+            ...(stepUpCode ? { stepUpCode } : {}),
+            ...(challenge ? { challenge } : {}),
+            ...(proof ? { proof } : {}),
+          }),
+        });
+        return {
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return {
+          content: [{ type: "text", text: `Failed to rotate agent key: ${message}` }],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.registerTool(
+    "revoke_agent_key",
+    {
+      description:
+        "Revoke an agent key. Requires TETHER_API_KEY plus step-up verification via stepUpCode or challenge+proof.",
+      inputSchema: {
+        agentId: z.string().describe("Agent ID"),
+        keyId: z.string().describe("Key ID"),
+        reason: z.string().optional().describe("Revoke reason"),
+        stepUpCode: z.string().optional().describe("Email step-up code"),
+        challenge: z.string().optional().describe("Challenge code for key-proof step-up"),
+        proof: z.string().optional().describe("Signature over challenge for key-proof step-up"),
+      },
+    },
+    async ({ agentId, keyId, reason, stepUpCode, challenge, proof }) => {
+      try {
+        const result = await managementFetch(`/agents/${agentId}/keys/${keyId}/revoke`, {
+          method: "POST",
+          body: JSON.stringify({
+            ...(reason ? { reason } : {}),
+            ...(stepUpCode ? { stepUpCode } : {}),
+            ...(challenge ? { challenge } : {}),
+            ...(proof ? { proof } : {}),
+          }),
+        });
+        return {
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return {
+          content: [{ type: "text", text: `Failed to revoke agent key: ${message}` }],
           isError: true,
         };
       }

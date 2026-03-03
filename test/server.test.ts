@@ -72,9 +72,12 @@ describe("tether-name-mcp-server", () => {
         "create_agent",
         "delete_agent",
         "get_agent_info",
+        "list_agent_keys",
         "list_agents",
         "list_domains",
         "request_challenge",
+        "revoke_agent_key",
+        "rotate_agent_key",
         "sign_challenge",
         "submit_proof",
         "verify_identity",
@@ -350,6 +353,60 @@ describe("tether-name-mcp-server", () => {
           arguments: {},
         });
 
+        const content = result.content as Array<{ type: string; text: string }>;
+        expect(content[0].text).toContain("TETHER_API_KEY");
+        expect(result.isError).toBe(true);
+      } finally {
+        restore();
+      }
+    });
+  });
+
+  describe("list_agent_keys", () => {
+    it("should return error when TETHER_API_KEY is not set", async () => {
+      const restore = setupEnv({ TETHER_API_KEY: undefined });
+      try {
+        const { client } = await createTestClient();
+        const result = await client.callTool({
+          name: "list_agent_keys",
+          arguments: { agentId: "agent-1" },
+        });
+        const content = result.content as Array<{ type: string; text: string }>;
+        expect(content[0].text).toContain("TETHER_API_KEY");
+        expect(result.isError).toBe(true);
+      } finally {
+        restore();
+      }
+    });
+  });
+
+  describe("rotate_agent_key", () => {
+    it("should return error when TETHER_API_KEY is not set", async () => {
+      const restore = setupEnv({ TETHER_API_KEY: undefined });
+      try {
+        const { client } = await createTestClient();
+        const result = await client.callTool({
+          name: "rotate_agent_key",
+          arguments: { agentId: "agent-1", publicKey: "BASE64_KEY" },
+        });
+        const content = result.content as Array<{ type: string; text: string }>;
+        expect(content[0].text).toContain("TETHER_API_KEY");
+        expect(result.isError).toBe(true);
+      } finally {
+        restore();
+      }
+    });
+  });
+
+  describe("revoke_agent_key", () => {
+    it("should return error when TETHER_API_KEY is not set", async () => {
+      const restore = setupEnv({ TETHER_API_KEY: undefined });
+      try {
+        const { client } = await createTestClient();
+        const result = await client.callTool({
+          name: "revoke_agent_key",
+          arguments: { agentId: "agent-1", keyId: "key-1" },
+        });
         const content = result.content as Array<{ type: string; text: string }>;
         expect(content[0].text).toContain("TETHER_API_KEY");
         expect(result.isError).toBe(true);

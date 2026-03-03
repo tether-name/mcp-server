@@ -25,6 +25,7 @@ The server reads from environment variables:
 | `TETHER_AGENT_ID`         | For verification      | Your Tether agent ID                                 |
 | `TETHER_PRIVATE_KEY_PATH` | For verification      | Path to your RSA private key (PEM or DER)            |
 | `TETHER_API_KEY`          | For management tools  | API key for agent and domain management              |
+| `TETHER_API_URL`          | Optional              | Override API base URL (default: `https://api.tether.name`) |
 
 ## MCP Client Setup
 
@@ -51,7 +52,7 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-> `TETHER_API_KEY` is only needed for management tools (`create_agent`, `list_agents`, `delete_agent`, `list_domains`). Verification tools only need `TETHER_AGENT_ID` and `TETHER_PRIVATE_KEY_PATH`.
+> `TETHER_API_KEY` is only needed for management tools (`create_agent`, `list_agents`, `delete_agent`, `list_domains`, `list_agent_keys`, `rotate_agent_key`, `revoke_agent_key`). Verification tools only need `TETHER_AGENT_ID` and `TETHER_PRIVATE_KEY_PATH`.
 
 ### Cursor
 
@@ -121,6 +122,9 @@ These tools require `TETHER_API_KEY` to be set.
 | `list_agents`         | List all agents for the authenticated account                                              |
 | `delete_agent`        | Delete an agent by ID                                                                      |
 | `list_domains`        | List all registered domains                                                                |
+| `list_agent_keys`     | List key lifecycle entries (`active`, `grace`, `revoked`) for an agent                    |
+| `rotate_agent_key`    | Rotate an agent key (requires step-up: `stepUpCode` or `challenge` + `proof`)             |
+| `revoke_agent_key`    | Revoke a key (requires step-up: `stepUpCode` or `challenge` + `proof`)                    |
 
 ## How It Works
 
