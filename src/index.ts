@@ -9,7 +9,7 @@ export function createServer(): McpServer {
     version: "2.0.4",
   });
 
-  function getClient(): TetherClient {
+  function getSigningClient(): TetherClient {
     const agentId = process.env.TETHER_AGENT_ID;
     const privateKeyPath = process.env.TETHER_PRIVATE_KEY_PATH;
 
@@ -28,6 +28,11 @@ export function createServer(): McpServer {
       agentId,
       privateKeyPath,
     });
+  }
+
+  function getChallengeClient(): TetherClient {
+    // No agent ID or private key needed for requesting challenges.
+    return new TetherClient({});
   }
 
   function getManagementClient(): TetherClient {
@@ -89,7 +94,7 @@ export function createServer(): McpServer {
     },
     async () => {
       try {
-        const client = getClient();
+        const client = getSigningClient();
         const result = await client.verify();
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
@@ -113,7 +118,7 @@ export function createServer(): McpServer {
     },
     async () => {
       try {
-        const client = getClient();
+        const client = getChallengeClient();
         const challenge = await client.requestChallenge();
         return {
           content: [
@@ -144,7 +149,7 @@ export function createServer(): McpServer {
     },
     async ({ challenge }) => {
       try {
-        const client = getClient();
+        const client = getSigningClient();
         const proof = client.sign(challenge);
         return {
           content: [
@@ -180,7 +185,7 @@ export function createServer(): McpServer {
     },
     async ({ challenge, proof }) => {
       try {
-        const client = getClient();
+        const client = getSigningClient();
         const result = await client.submitProof(challenge, proof);
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],

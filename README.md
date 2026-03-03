@@ -22,8 +22,8 @@ The server reads from environment variables:
 
 | Variable                  | Required              | Description                                          |
 |---------------------------|-----------------------|------------------------------------------------------|
-| `TETHER_AGENT_ID`         | For verification      | Your Tether agent ID                                 |
-| `TETHER_PRIVATE_KEY_PATH` | For verification      | Path to your RSA private key (PEM or DER)            |
+| `TETHER_AGENT_ID`         | For sign/submit/verify tools | Your Tether agent ID                           |
+| `TETHER_PRIVATE_KEY_PATH` | For sign/submit/verify tools | Path to your RSA private key (PEM or DER)      |
 | `TETHER_API_KEY`          | For management tools  | API key for agent and domain management              |
 | `TETHER_API_URL`          | Optional              | Override API base URL (default: `https://api.tether.name`) |
 
@@ -52,7 +52,9 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-> `TETHER_API_KEY` is only needed for management tools (`create_agent`, `list_agents`, `delete_agent`, `list_domains`, `list_agent_keys`, `rotate_agent_key`, `revoke_agent_key`). Verification tools only need `TETHER_AGENT_ID` and `TETHER_PRIVATE_KEY_PATH`.
+> `TETHER_API_KEY` is only needed for management tools (`create_agent`, `list_agents`, `delete_agent`, `list_domains`, `list_agent_keys`, `rotate_agent_key`, `revoke_agent_key`).
+>
+> `request_challenge` does **not** require agent key env vars. `verify_identity`, `sign_challenge`, and `submit_proof` require both `TETHER_AGENT_ID` and `TETHER_PRIVATE_KEY_PATH`.
 
 ### Cursor
 

@@ -206,11 +206,18 @@ describe("tether-name-mcp-server", () => {
   });
 
   describe("request_challenge", () => {
-    it("should return error when agent settings are not configured", async () => {
+    it("should work without agent signing env vars", async () => {
       const restore = setupEnv({
         TETHER_AGENT_ID: undefined,
         TETHER_PRIVATE_KEY_PATH: undefined,
       });
+
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(JSON.stringify({ code: "challenge-123" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      );
 
       try {
         const { client } = await createTestClient();
@@ -220,9 +227,10 @@ describe("tether-name-mcp-server", () => {
         });
 
         const content = result.content as Array<{ type: string; text: string }>;
-        expect(content[0].text).toContain("TETHER_AGENT_ID");
-        expect(result.isError).toBe(true);
+        expect(content[0].text).toContain("challenge-123");
+        expect(result.isError).not.toBe(true);
       } finally {
+        fetchMock.mockRestore();
         restore();
       }
     });
