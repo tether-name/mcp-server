@@ -24,8 +24,10 @@ The server reads from environment variables:
 |---------------------------|-----------------------|------------------------------------------------------|
 | `TETHER_AGENT_ID`         | For sign/submit/verify tools | Your Tether agent ID                           |
 | `TETHER_PRIVATE_KEY_PATH` | For sign/submit/verify tools | Path to your RSA private key (PEM or DER)      |
-| `TETHER_API_KEY`          | For management tools  | API key for agent and domain management              |
-| `TETHER_API_URL`          | Optional              | Override API base URL (default: `https://api.tether.name`) |
+| `TETHER_API_KEY`          | For management tools  | Management bearer token (API key or JWT)             |
+| `TETHER_API_URL`          | Optional              | Override API base URL for key-lifecycle tools (`list_agent_keys`, `rotate_agent_key`, `revoke_agent_key`) |
+
+`verify_identity`, `request_challenge`, `sign_challenge`, `submit_proof`, `create_agent`, `list_agents`, `delete_agent`, and `list_domains` use the SDK default API URL (`https://api.tether.name`).
 
 ## MCP Client Setup
 
@@ -116,7 +118,7 @@ Add to your VS Code settings or `.vscode/mcp.json`:
 
 ### Agent Management
 
-These tools require `TETHER_API_KEY` to be set.
+These tools require `TETHER_API_KEY` to be set (it can be an API key or JWT bearer token).
 
 | Tool                  | Description                                                                                |
 |-----------------------|--------------------------------------------------------------------------------------------|
@@ -127,6 +129,8 @@ These tools require `TETHER_API_KEY` to be set.
 | `list_agent_keys`     | List key lifecycle entries (`active`, `grace`, `revoked`) for an agent                    |
 | `rotate_agent_key`    | Rotate an agent key (requires step-up: `stepUpCode` or `challenge` + `proof`)             |
 | `revoke_agent_key`    | Revoke a key (requires step-up: `stepUpCode` or `challenge` + `proof`)                    |
+
+For automation with API keys, prefer challenge+proof step-up.
 
 ## How It Works
 
