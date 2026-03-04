@@ -323,6 +323,55 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
+    "update_agent_identity",
+    {
+      description:
+        "Update which identity is shown when an agent is verified. Use a verified domainId to show that domain, or set showEmail=true to show account email.",
+      inputSchema: {
+        agentId: z.string().describe("The agent ID to update"),
+        domainId: z.string().optional().describe("Verified domain ID to show for this agent"),
+        showEmail: z.boolean().optional().describe("Set true to show account email instead of a domain"),
+      },
+    },
+    async ({ agentId, domainId, showEmail }) => {
+      try {
+        const wantsDomain = Boolean(domainId && domainId.trim().length > 0);
+        const wantsEmail = Boolean(showEmail);
+
+        if (wantsDomain === wantsEmail) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: "Provide exactly one of: domainId (to show a verified domain) OR showEmail=true (to show account email).",
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        const result = await managementFetch(`/agents/${agentId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ domainId: wantsEmail ? "" : domainId }),
+        });
+
+        return {
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text", text: `Failed to update agent identity: ${message}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.registerTool(
     "list_domains",
     {
       description:

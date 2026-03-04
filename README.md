@@ -27,7 +27,7 @@ The server reads from environment variables:
 | `TETHER_API_KEY`          | For management tools  | Management bearer token (API key or JWT)             |
 | `TETHER_API_URL`          | Optional              | Override API base URL for key-lifecycle tools (`list_agent_keys`, `rotate_agent_key`, `revoke_agent_key`) |
 
-`verify_identity`, `request_challenge`, `sign_challenge`, `submit_proof`, `create_agent`, `list_agents`, `delete_agent`, and `list_domains` use the SDK default API URL (`https://api.tether.name`).
+`verify_identity`, `request_challenge`, `sign_challenge`, `submit_proof`, `create_agent`, `list_agents`, `delete_agent`, `update_agent_identity`, and `list_domains` use the SDK default API URL (`https://api.tether.name`).
 
 ## MCP Client Setup
 
@@ -54,7 +54,7 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-> `TETHER_API_KEY` is only needed for management tools (`create_agent`, `list_agents`, `delete_agent`, `list_domains`, `list_agent_keys`, `rotate_agent_key`, `revoke_agent_key`).
+> `TETHER_API_KEY` is only needed for management tools (`create_agent`, `list_agents`, `delete_agent`, `update_agent_identity`, `list_domains`, `list_agent_keys`, `rotate_agent_key`, `revoke_agent_key`).
 >
 > `request_challenge` does **not** require agent key env vars. `verify_identity`, `sign_challenge`, and `submit_proof` require both `TETHER_AGENT_ID` and `TETHER_PRIVATE_KEY_PATH`.
 
@@ -122,10 +122,11 @@ These tools require `TETHER_API_KEY` to be set (it can be an API key or JWT bear
 
 | Tool                  | Description                                                                                |
 |-----------------------|--------------------------------------------------------------------------------------------|
-| `create_agent`        | Create a new agent (with optional domain assignment via `domainId`)                        |
-| `list_agents`         | List all agents for the authenticated account                                              |
-| `delete_agent`        | Delete an agent by ID                                                                      |
-| `list_domains`        | List all registered domains                                                                |
+| `create_agent`          | Create a new agent (with optional domain assignment via `domainId`)                      |
+| `list_agents`           | List all agents for the authenticated account                                            |
+| `delete_agent`          | Delete an agent by ID                                                                    |
+| `update_agent_identity` | Update whether verification shows a verified domain (`domainId`) or account email       |
+| `list_domains`          | List all registered domains                                                              |
 | `list_agent_keys`     | List key lifecycle entries (`active`, `grace`, `revoked`) for an agent                    |
 | `rotate_agent_key`    | Rotate an agent key (requires step-up: `stepUpCode` or `challenge` + `proof`)             |
 | `revoke_agent_key`    | Revoke a key (requires step-up: `stepUpCode` or `challenge` + `proof`)                    |

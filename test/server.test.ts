@@ -80,6 +80,7 @@ describe("tether-name-mcp-server", () => {
         "rotate_agent_key",
         "sign_challenge",
         "submit_proof",
+        "update_agent_identity",
         "verify_identity",
       ]);
     });
@@ -337,6 +338,28 @@ describe("tether-name-mcp-server", () => {
         const result = await client.callTool({
           name: "delete_agent",
           arguments: { agentId: "test-id" },
+        });
+
+        const content = result.content as Array<{ type: string; text: string }>;
+        expect(content[0].text).toContain("TETHER_API_KEY");
+        expect(result.isError).toBe(true);
+      } finally {
+        restore();
+      }
+    });
+  });
+
+  describe("update_agent_identity", () => {
+    it("should return error when TETHER_API_KEY is not set", async () => {
+      const restore = setupEnv({
+        TETHER_API_KEY: undefined,
+      });
+
+      try {
+        const { client } = await createTestClient();
+        const result = await client.callTool({
+          name: "update_agent_identity",
+          arguments: { agentId: "test-id", showEmail: true },
         });
 
         const content = result.content as Array<{ type: string; text: string }>;
